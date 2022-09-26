@@ -27,24 +27,14 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 import Button from "@material-ui/core/Button";
 
 import Home from "../home";
-import Profile from "../profile";
-import Settings from "../settings";
-import Questionnaire from "../questionnaire";
-import Survey from "../survey";
-import AddEntry from "../addentry";
-import AdminSurvey from "../admin/survey";
-import AdminQuestionnaire from "../admin/questionnaire";
-import AdminQuestion from "../admin/question";
-import AdminUser from "../admin/users";
-import AdminGroup from "../admin/groups";
+
 import SurveyQuestionarrireQuestion from "../custom/surveyQuestion";
 import SurveyComplete from "../custom/surveyComplete";
-
-import { createMuiTheme } from "@material-ui/core/styles";
+import { createTheme } from "@material-ui/core/styles";
 import orange from "@material-ui/core/colors/orange";
 import indigo from "@material-ui/core/colors/indigo";
 
-const theme = createMuiTheme({
+const theme = createTheme({
   palette: {
     primary: orange,
     secondary: indigo,

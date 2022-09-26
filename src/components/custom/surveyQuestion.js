@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { graphql, compose, withApollo } from "react-apollo";
 import gql from "graphql-tag";
+import { useLocation } from "react-router-dom";
 import { makeStyles, createStyles } from "@material-ui/core/styles";
 import { getQuestionnaire } from "../../graphql/queries";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
@@ -65,6 +66,8 @@ const useStyles = makeStyles((theme) =>
 );
 
 const SurveyQuestion = (props) => {
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
   const classes = useStyles();
   const [group] = React.useState(uuid());
   const {
@@ -102,7 +105,7 @@ const SurveyQuestion = (props) => {
   const handleFinish = () => {
     props.onCreateSurveyEntries({
       id: group,
-      by: "user101",
+      by: params?.get("uid"),
     });
     [
       ...ANSLIST,
@@ -111,7 +114,6 @@ const SurveyQuestion = (props) => {
         answer: currentAnswer,
       },
     ].map((response) => {
-      // console.log("response", response);
       props.onCreateResponse({
         responsesQuId: response?.questionId,
         res: response?.answer,
@@ -401,7 +403,7 @@ const SurveyQuestion = (props) => {
       }
     }
   }, [currentQuestion]);
-  console.log("ANSLIST", group);
+  // console.log("ANSLIST", params?.get("uid"));
 
   if (loading) {
     return (
@@ -502,7 +504,6 @@ const SurveyQuestionarrireQuestion = compose(
   graphql(gql(createResponses), {
     props: (props) => ({
       onCreateResponse: (response) => {
-        console.log("Creating response : ", response);
         props.mutate({
           variables: {
             input: response,

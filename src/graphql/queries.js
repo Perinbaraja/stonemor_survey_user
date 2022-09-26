@@ -117,7 +117,7 @@ export const getQuestionnaire = /* GraphQL */ `
       type
       createdAt
       updatedAt
-      question {
+      question(limit: 200) {
         items {
           id
           qu
