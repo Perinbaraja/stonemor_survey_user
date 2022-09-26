@@ -62,6 +62,12 @@ const useStyles = makeStyles((theme) =>
       maxWidth: 300,
       paddingTop: 14,
     },
+    loadCenter: {
+      display: "flex",
+      marginTop: "30px",
+      justifyContent: "center",
+      alignItems: "center",
+    },
   })
 );
 
@@ -86,6 +92,7 @@ const SurveyQuestion = (props) => {
   const [ANSLIST, setANSLIST] = useState([]);
   const [checked, setChecked] = React.useState([]);
   const [final, setFinal] = React.useState(false);
+  const [isPostingResponse, setIsPostingResponse] = React.useState(false);
 
   const onValueChange = (event, newValue) => {
     setCurrentAnswer(newValue);
@@ -102,25 +109,31 @@ const SurveyQuestion = (props) => {
       : setChecked([...temp]);
     setCurrentAnswer(checked);
   };
-  const handleFinish = () => {
-    props.onCreateSurveyEntries({
+  const handleFinish = async (event) => {
+    event.preventDefault();
+    setIsPostingResponse(true);
+    const dummyRes = await props.onCreateSurveyEntries({
       id: group,
       by: params?.get("uid"),
     });
-    [
-      ...ANSLIST,
-      {
-        questionId: currentQuestion?.id,
-        answer: currentAnswer,
-      },
-    ].map((response) => {
-      props.onCreateResponse({
-        responsesQuId: response?.questionId,
-        res: response?.answer,
-        responsesGroupId: group,
-      });
-      return <CircularProgress />;
-    });
+    await Promise.all(
+      [
+        ...ANSLIST,
+        {
+          questionId: currentQuestion?.id,
+          answer: currentAnswer,
+        },
+      ].map(async (response) => {
+        await props.onCreateResponse({
+          responsesQuId: response?.questionId,
+          res: response?.answer,
+          responsesGroupId: group,
+        });
+        return <CircularProgress />;
+      })
+    );
+    setIsPostingResponse(false);
+    console.log("Survey completed successfully : ");
     props.history.push("/surveyComplete");
   };
 
@@ -176,7 +189,6 @@ const SurveyQuestion = (props) => {
       const nextQuestion = currentQuestion?.dependent?.options?.find(
         (o) => o?.dependentValue === ansofDepQuestion?.answer
       );
-      // console.log("CS :", nextQuestion);
       setCurrentQuestion(
         questions?.find((q) => q?.id === nextQuestion?.nextQuestion)
       );
@@ -412,6 +424,16 @@ const SurveyQuestion = (props) => {
       </div>
     );
   }
+  if (isPostingResponse) {
+    return (
+      <div className={classes.loadCenter}>
+        <CircularProgress className={classes.progress} />
+        <Typography variant="h5" component="h3">
+          Posting Responses.Please wait...
+        </Typography>
+      </div>
+    );
+  }
   if (error) {
     console.log(error);
     return (
@@ -503,8 +525,8 @@ const SurveyQuestionarrireQuestion = compose(
   }),
   graphql(gql(createResponses), {
     props: (props) => ({
-      onCreateResponse: (response) => {
-        props.mutate({
+      onCreateResponse: async (response) => {
+        await props.mutate({
           variables: {
             input: response,
           },
