@@ -123,13 +123,20 @@ export const getQuestionnaire = /* GraphQL */ `
           qu
           type
           isSelf
+          isDependent
           listOptions {
             listValue
             nextQuestion
             isText
             isMultiple
           }
-          isDependent
+          dependent {
+            id
+            options {
+              dependentValue
+              nextQuestion
+            }
+          }
           order
           createdAt
           updatedAt
@@ -221,6 +228,10 @@ export const listQuestions = /* GraphQL */ `
         order
         dependent {
           id
+          options {
+            dependentValue
+            nextQuestion
+          }
         }
         createdAt
         updatedAt
@@ -350,6 +361,35 @@ export const listSurveyEntriess = /* GraphQL */ `
         responses {
           nextToken
         }
+      }
+      nextToken
+    }
+  }
+`;
+export const getSurveyUser = /* GraphQL */ `
+  query GetSurveyUser($id: ID!) {
+    getSurveyUser(id: $id) {
+      id
+      name
+      email
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const listSurveyUsers = /* GraphQL */ `
+  query ListSurveyUsers(
+    $filter: ModelSurveyUserFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listSurveyUsers(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        name
+        email
+        createdAt
+        updatedAt
       }
       nextToken
     }

@@ -599,3 +599,45 @@ export const deleteSurveyEntries = /* GraphQL */ `
     }
   }
 `;
+export const createSurveyUser = /* GraphQL */ `
+  mutation CreateSurveyUser(
+    $input: CreateSurveyUserInput!
+    $condition: ModelSurveyUserConditionInput
+  ) {
+    createSurveyUser(input: $input, condition: $condition) {
+      id
+      name
+      email
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const updateSurveyUser = /* GraphQL */ `
+  mutation UpdateSurveyUser(
+    $input: UpdateSurveyUserInput!
+    $condition: ModelSurveyUserConditionInput
+  ) {
+    updateSurveyUser(input: $input, condition: $condition) {
+      id
+      name
+      email
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const deleteSurveyUser = /* GraphQL */ `
+  mutation DeleteSurveyUser(
+    $input: DeleteSurveyUserInput!
+    $condition: ModelSurveyUserConditionInput
+  ) {
+    deleteSurveyUser(input: $input, condition: $condition) {
+      id
+      name
+      email
+      createdAt
+      updatedAt
+    }
+  }
+`;
