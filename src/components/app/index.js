@@ -33,10 +33,13 @@ import SurveyComplete from "../custom/surveyComplete";
 import { createTheme } from "@material-ui/core/styles";
 import orange from "@material-ui/core/colors/orange";
 import indigo from "@material-ui/core/colors/indigo";
+import SurveyResponses from "../admin/surveyResponses";
 
 const theme = createTheme({
   palette: {
-    primary: orange,
+    primary: {
+      main: "#5E8ABF",
+    },
     secondary: indigo,
   },
 });
@@ -145,7 +148,7 @@ function App() {
 
   return (
     <div className={classes.root}>
-      <Dialog
+      {/* <Dialog
         open={openDialog}
         onClose={handleCloseDialog}
         aria-labelledby="alert-dialog-title"
@@ -168,7 +171,7 @@ function App() {
             Add
           </Button>
         </DialogActions>
-      </Dialog>
+      </Dialog> */}
       <MuiThemeProvider theme={theme}>
         <BrowserRouter>
           {/* <AppBar position="sticky" className={classes.appbar}>
@@ -231,12 +234,14 @@ function App() {
               )}
             </Toolbar>
           </AppBar> */}
+
           <Route exact path="/" component={Home} />
 
           <Route
             path="/surveyquestions/:questionnaireID"
             component={SurveyQuestionarrireQuestion}
           />
+          <Route path="/responses/:responseID" component={SurveyResponses} />
           <Route path="/surveyComplete" component={SurveyComplete} />
         </BrowserRouter>
       </MuiThemeProvider>

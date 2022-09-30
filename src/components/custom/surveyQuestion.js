@@ -1,29 +1,51 @@
 import React, { useState, useEffect } from "react";
 import { graphql, compose, withApollo } from "react-apollo";
 import gql from "graphql-tag";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { makeStyles, createStyles } from "@material-ui/core/styles";
-import { getQuestionnaire } from "../../graphql/queries";
+import {
+  getQuestionnaire,
+  listResponsess,
+  listSurveyEntriess,
+  listSurveyUsers,
+} from "../../graphql/queries";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import { v4 as uuid } from "uuid";
 import ArrowForwardIcon from "@material-ui/icons/ArrowForward";
 import { createResponses, createSurveyEntries } from "../../graphql/mutations";
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogTitle from "@material-ui/core/DialogTitle";
+import AddCircleIcon from "@material-ui/icons/AddCircle";
+import VisibilityIcon from "@material-ui/icons/Visibility";
+import AdminMenu from "./index";
 
 import {
+  AppBar,
   Box,
   Button,
   Checkbox,
   CircularProgress,
+  Container,
   FormControl,
   FormControlLabel,
   FormGroup,
   FormLabel,
+  LinearProgress,
   Paper,
   Radio,
   RadioGroup,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
   TextField,
   Typography,
 } from "@material-ui/core";
+import StickyFooter from "./footer";
 
 const useStyles = makeStyles((theme) =>
   createStyles({
@@ -68,9 +90,19 @@ const useStyles = makeStyles((theme) =>
       justifyContent: "center",
       alignItems: "center",
     },
+    progressBar: {
+      with: "20%",
+    },
   })
 );
-
+const styles = {
+  paperContainer: {
+    backgroundRepeat: "no-repeat",
+    backgroundImage: `url('https://basis.net/wp-content/uploads/2021/10/house_plant_home.jpeg')`,
+    backgroundSize: "cover",
+    minHeight: "100vh",
+  },
+};
 const SurveyQuestion = (props) => {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
@@ -79,8 +111,29 @@ const SurveyQuestion = (props) => {
   const {
     data: { loading, error, getQuestionnaire },
   } = props.getQuestionnaire;
-
+  //response//
+  const {
+    data: { listResponsess },
+  } = props.listResponsess;
   const questions = getQuestionnaire?.question?.items;
+
+  const {
+    data: { listSurveyEntriess },
+  } = props.listSurveyEntriess;
+
+  const {
+    data: { listSurveyUsers },
+  } = props.listSurveyUsers;
+
+  const onGettingSurveyUserNameById = (id) => {
+    const que = listSurveyUsers?.items?.find((q) => q?.id === id);
+    return que?.name ?? id;
+  };
+  const onGettingSurveyUserEmailById = (id) => {
+    const que = listSurveyUsers?.items?.find((q) => q?.id === id);
+    return que?.email ?? id;
+  };
+  //responses//
   const firstQuestion =
     questions?.find((q) => q?.order === 1) ||
     questions?.sort((a, b) => b?.order - a?.order)[questions?.length - 1];
@@ -94,8 +147,21 @@ const SurveyQuestion = (props) => {
   const [final, setFinal] = React.useState(false);
   const [isPostingResponse, setIsPostingResponse] = React.useState(false);
 
+  const [open, setOpen] = React.useState(true);
   const onValueChange = (event, newValue) => {
     setCurrentAnswer(newValue);
+  };
+  const value = currentQuestion?.order - 1;
+  console.log("valuie", value);
+  const normalise = () => ((value - MIN) * 100) / (MAX - MIN);
+  const MIN = 0;
+
+  console.log("MIN", MIN);
+  const MAX = getQuestionnaire?.question?.items?.length;
+  console.log("MAX", MAX);
+
+  const handleClose = () => {
+    setOpen(false);
   };
   const handleChange = (e) => {
     var temp = checked;
@@ -136,7 +202,7 @@ const SurveyQuestion = (props) => {
     console.log("Survey completed successfully : ");
     props.history.push("/surveyComplete");
   };
-
+  console.log("ANSLIST", ANSLIST);
   const handleNextClick = () => {
     setANSLIST([
       ...ANSLIST,
@@ -239,8 +305,11 @@ const SurveyQuestion = (props) => {
               style={{ margin: "10px 0", color: "black" }}
               id="demo-radio-buttons-group-label"
             >
-              Q.
-              {q?.qu}
+              <Typography sx={{ paddingTop: 2 }}>
+                {" "}
+                Q.
+                {q?.qu}
+              </Typography>
             </FormLabel>
             <RadioGroup
               aria-labelledby="demo-radio-buttons-group-label"
@@ -267,8 +336,11 @@ const SurveyQuestion = (props) => {
               style={{ margin: "10px 0", color: "black" }}
               id="demo-radio-buttons-group-label"
             >
-              Q.
-              {q?.qu}
+              <Typography sx={{ paddingTop: 2 }}>
+                {" "}
+                Q.
+                {q?.qu}
+              </Typography>
             </FormLabel>
             <TextField
               required
@@ -289,8 +361,11 @@ const SurveyQuestion = (props) => {
               style={{ margin: "10px 0", color: "black" }}
               id="demo-radio-buttons-group-label"
             >
-              Q.
-              {q?.qu}
+              <Typography sx={{ paddingTop: 2 }}>
+                {" "}
+                Q.
+                {q?.qu}
+              </Typography>
             </FormLabel>
             <RadioGroup
               aria-labelledby="demo-radio-buttons-group-label"
@@ -329,8 +404,11 @@ const SurveyQuestion = (props) => {
                 style={{ margin: "10px 0", color: "black" }}
                 id="demo-radio-buttons-group-label"
               >
-                Q.
-                {q?.qu}
+                <Typography sx={{ paddingTop: 2 }}>
+                  {" "}
+                  Q.
+                  {q?.qu}
+                </Typography>
               </FormLabel>
 
               {q?.listOptions.map((option, o) => (
@@ -358,8 +436,11 @@ const SurveyQuestion = (props) => {
                 style={{ margin: "10px 0", color: "black" }}
                 id="demo-radio-buttons-group-label"
               >
-                Q.
-                {q?.qu}
+                <Typography sx={{ paddingTop: 2 }}>
+                  {" "}
+                  Q.
+                  {q?.qu}
+                </Typography>
               </FormLabel>
 
               {q?.listOptions.map((option, o) => (
@@ -394,7 +475,13 @@ const SurveyQuestion = (props) => {
           </FormControl>
         );
       default:
-        return <p>Q. {q?.qu}</p>;
+        return (
+          <Typography sx={{ paddingTop: 2 }}>
+            {" "}
+            Q.
+            {q?.qu}
+          </Typography>
+        );
     }
   };
 
@@ -452,60 +539,193 @@ const SurveyQuestion = (props) => {
   }
 
   return (
-    <div className={classes.root}>
-      <img
-        src="https://dynamix-cdn.s3.amazonaws.com/stonemorcom/stonemorcom_616045937.svg"
-        alt="logo"
-        className={classes.logo}
-      />
-      <Typography className={classes.custom} variant="h5">
-        {getQuestionnaire?.name}
-      </Typography>
-      <div className={classes.cont}>
-        <div>{getQuestionView(currentQuestion)}</div>
-        <Box>
-          <Button
-            variant="contained"
-            color="primary"
-            className={classes.button}
-            disabled={
-              currentQuestion?.order
-                ? currentQuestion?.order === 1
-                : questions?.findIndex((q) => q?.id === currentQuestion?.id) ===
-                  0
-            }
-            data-amplify-analytics-on="click"
-            data-amplify-analytics-name="click"
-            onClick={handlePreviousClick}
+    <div className={classes.root} style={styles.paperContainer}>
+      {/* <AppBar position="stickey">
+        <div style={{ justifyContent: "center", alignItems: "center" }}>
+          <img
+            src="https://dynamix-cdn.s3.amazonaws.com/stonemorcom/stonemorcom_616045937.svg"
+            alt="logo"
+            className={classes.logo}
+          />
+        </div>
+      </AppBar> */}
+      <AdminMenu />
+      {/* <Dialog
+        open={open}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">{"Stonemor"}</DialogTitle>
+        <DialogContent>
+          <DialogContentText
+          // id="alert-dialog-description"
           >
-            <ArrowBackIcon />
-            Prev
+            Welcome to {getQuestionnaire?.name}. Click continue to attend
+            survey.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} color="primary" autoFocus>
+            continue
           </Button>
-          {final ? (
-            <Button
-              variant="contained"
-              color="primary"
-              data-amplify-analytics-on="click"
-              onClick={handleFinish}
-            >
-              Finish
-              {/* <ArrowForwardIcon /> */}
-            </Button>
-          ) : (
+        </DialogActions>
+      </Dialog> */}
+
+      {/* <Container maxWidth="md">
+        <Typography className={classes.custom} variant="h5">
+          {getQuestionnaire?.name}
+        </Typography>
+        <div className={classes.cont}>
+          <div>{getQuestionView(currentQuestion)}</div>
+          <Box>
             <Button
               variant="contained"
               color="primary"
               className={classes.button}
-              disabled={!currentAnswer}
+              disabled={
+                currentQuestion?.order
+                  ? currentQuestion?.order === 1
+                  : questions?.findIndex(
+                      (q) => q?.id === currentQuestion?.id
+                    ) === 0
+              }
               data-amplify-analytics-on="click"
-              onClick={handleNextClick2}
+              data-amplify-analytics-name="click"
+              onClick={handlePreviousClick}
             >
-              Next
-              <ArrowForwardIcon />
+              <ArrowBackIcon />
+              Prev
             </Button>
-          )}
+            {final ? (
+              <Button
+                variant="contained"
+                color="primary"
+                data-amplify-analytics-on="click"
+                onClick={handleFinish}
+              >
+                Finish
+             
+              </Button>
+            ) : (
+              <Button
+                variant="contained"
+                color="primary"
+                className={classes.button}
+                disabled={!currentAnswer}
+                data-amplify-analytics-on="click"
+                onClick={handleNextClick2}
+              >
+                Next
+                <ArrowForwardIcon />
+              </Button>
+            )}
+          </Box>
+        </div>
+      </Container> */}
+
+      {/* <div>
+        <Box display="flex" alignItems="center" justifyContent="center" mt={10}>
+          <Box width="20%" mr={1}>
+            <LinearProgress
+              variant="determinate"
+              value={normalise(props.value)}
+            />
+          </Box>
+          <Box minWidth={35}>
+            <Typography variant="body2" color="textSecondary">{`${Math.round(
+              normalise(props.value)
+            )}%`}</Typography>
+          </Box>
+        </Box>
+      </div> */}
+      <div
+        style={{
+          // do your styles depending on your needs.
+          display: "flex",
+          justifyContent: "end",
+          alignItems: "center",
+          marginRight: "3rem",
+        }}
+      >
+        <Box display="flex" alignItems="center" justifyContent="end">
+          <Box width="0%" mr={1}>
+            <CircularProgress
+              variant="determinate"
+              value={normalise(props.value)}
+            />
+          </Box>
+          <Box minWidth={40}>
+            <Typography variant="body2" color="textSecondary">{`${Math.round(
+              normalise(props.value)
+            )}%`}</Typography>
+          </Box>
         </Box>
       </div>
+      <main className={classes.root}>
+        <Typography variant="h2">Responses</Typography>
+        <p />
+        <Paper className={classes.content}>
+          <Table className={classes.table}>
+            <TableHead>
+              <TableRow>
+                <TableCell>Name</TableCell>
+                <TableCell>Email</TableCell>
+                {/* <TableCell>Type</TableCell> */}
+                {/* <TableCell>Manage</TableCell> */}
+                <TableCell>View</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {listResponsess.items.map((response, q) => (
+                <TableRow key={q}>
+                  <TableCell>
+                    {onGettingSurveyUserNameById(response?.group?.by)}
+                  </TableCell>
+                  <TableCell>
+                    {" "}
+                    {onGettingSurveyUserEmailById(response?.group?.by)}
+                  </TableCell>
+                  {/* <TableCell>{response.type}</TableCell> */}
+                  {/* <TableCell> */}
+                  {/* <Button
+                      size="small"
+                      color="primary"
+                      onClick={handleSnackBarClick}
+                    >
+                      <EditIcon />
+                    </Button> */}
+                  {/* <Button
+                      size="small"
+                      color="primary"
+                      onClick={() => handleOpenDeleteDialog(questionnaire)}
+                    >
+                      <DeleteIcon />
+                    </Button>
+                  </TableCell> */}
+                  <TableCell>
+                    <Button
+                      size="small"
+                      color="primary"
+                      component={Link}
+                      to={`/admin/${response.id}`}
+                    >
+                      <VisibilityIcon />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </Paper>
+        <Button
+          variant="contained"
+          color="primary"
+          className={classes.button}
+          // onClick={handleOpenDialog}
+        >
+          <AddCircleIcon className={classes.rightIcon} /> Add Questionnaire
+        </Button>
+      </main>
     </div>
   );
 };
@@ -547,6 +767,41 @@ const SurveyQuestionarrireQuestion = compose(
         });
       },
     }),
+  }),
+
+  //response//
+  graphql(gql(listResponsess), {
+    options: (props) => ({
+      errorPolicy: "all",
+      fetchPolicy: "cache-and-network",
+    }),
+    props: (props) => {
+      return {
+        listResponsess: props ? props : [],
+      };
+    },
+  }),
+  graphql(gql(listSurveyEntriess), {
+    options: (props) => ({
+      errorPolicy: "all",
+      fetchPolicy: "cache-and-network",
+    }),
+    props: (props) => {
+      return {
+        listSurveyEntriess: props ? props : [],
+      };
+    },
+  }),
+  graphql(gql(listSurveyUsers), {
+    options: (props) => ({
+      errorPolicy: "all",
+      fetchPolicy: "cache-and-network",
+    }),
+    props: (props) => {
+      return {
+        listSurveyUsers: props ? props : [],
+      };
+    },
   })
 )(SurveyQuestion);
 
