@@ -1,26 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { graphql, compose, withApollo } from "react-apollo";
 import gql from "graphql-tag";
-import { Link, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { makeStyles, createStyles } from "@material-ui/core/styles";
-import {
-  getQuestionnaire,
-  listResponsess,
-  listSurveyEntriess,
-  listSurveyUsers,
-} from "../../graphql/queries";
+import { getQuestionnaire } from "../../graphql/queries";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import { v4 as uuid } from "uuid";
 import ArrowForwardIcon from "@material-ui/icons/ArrowForward";
 import { createResponses, createSurveyEntries } from "../../graphql/mutations";
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogContentText from "@material-ui/core/DialogContentText";
-import DialogTitle from "@material-ui/core/DialogTitle";
-import AddCircleIcon from "@material-ui/icons/AddCircle";
-import VisibilityIcon from "@material-ui/icons/Visibility";
-import AdminMenu from "./index";
 
 import {
   AppBar,
@@ -29,23 +16,22 @@ import {
   Checkbox,
   CircularProgress,
   Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   FormControl,
   FormControlLabel,
   FormGroup,
   FormLabel,
-  LinearProgress,
   Paper,
   Radio,
   RadioGroup,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
   TextField,
+  Toolbar,
   Typography,
 } from "@material-ui/core";
-import StickyFooter from "./footer";
 
 const useStyles = makeStyles((theme) =>
   createStyles({
@@ -86,7 +72,7 @@ const useStyles = makeStyles((theme) =>
     },
     loadCenter: {
       display: "flex",
-      marginTop: "30px",
+      marginTop: "16rem",
       justifyContent: "center",
       alignItems: "center",
     },
@@ -103,6 +89,8 @@ const styles = {
     minHeight: "100vh",
   },
 };
+const startTime = new Date().toISOString();
+
 const SurveyQuestion = (props) => {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
@@ -111,76 +99,64 @@ const SurveyQuestion = (props) => {
   const {
     data: { loading, error, getQuestionnaire },
   } = props.getQuestionnaire;
-  //response//
-  const {
-    data: { listResponsess },
-  } = props.listResponsess;
+
   const questions = getQuestionnaire?.question?.items;
-
-  const {
-    data: { listSurveyEntriess },
-  } = props.listSurveyEntriess;
-
-  const {
-    data: { listSurveyUsers },
-  } = props.listSurveyUsers;
-
-  const onGettingSurveyUserNameById = (id) => {
-    const que = listSurveyUsers?.items?.find((q) => q?.id === id);
-    return que?.name ?? id;
-  };
-  const onGettingSurveyUserEmailById = (id) => {
-    const que = listSurveyUsers?.items?.find((q) => q?.id === id);
-    return que?.email ?? id;
-  };
-  //responses//
   const firstQuestion =
     questions?.find((q) => q?.order === 1) ||
     questions?.sort((a, b) => b?.order - a?.order)[questions?.length - 1];
   const lastQuestion = questions?.sort((a, b) => a?.order - b?.order)[
     questions?.length - 1
   ];
+
   const [currentQuestion, setCurrentQuestion] = useState(firstQuestion);
   const [currentAnswer, setCurrentAnswer] = useState("");
+
   const [ANSLIST, setANSLIST] = useState([]);
-  const [checked, setChecked] = React.useState([]);
+
+  const [check, setCheck] = React.useState([]);
   const [final, setFinal] = React.useState(false);
   const [isPostingResponse, setIsPostingResponse] = React.useState(false);
-
   const [open, setOpen] = React.useState(true);
+
+  console.log("startTime : ", startTime);
   const onValueChange = (event, newValue) => {
     setCurrentAnswer(newValue);
   };
   const value = currentQuestion?.order - 1;
-  console.log("valuie", value);
+  // console.log("valuie", value);
   const normalise = () => ((value - MIN) * 100) / (MAX - MIN);
   const MIN = 0;
 
-  console.log("MIN", MIN);
+  // console.log("MIN", MIN);
   const MAX = getQuestionnaire?.question?.items?.length;
-  console.log("MAX", MAX);
+  // console.log("MAX", MAX);
 
   const handleClose = () => {
     setOpen(false);
   };
   const handleChange = (e) => {
-    var temp = checked;
+    var temp = check;
     if (e.target.checked === false) {
       temp = temp.filter((a) => {
-        return a !== e.target.value;
+        return a === e.target.value;
       });
     }
     e.target.checked
-      ? setChecked([...checked, e.target.value])
-      : setChecked([...temp]);
-    setCurrentAnswer(checked);
+      ? setCheck([...check, e.target.value])
+      : setCheck([...temp]);
+    setCurrentAnswer(check);
+    console.log("temp", temp);
   };
+
   const handleFinish = async (event) => {
     event.preventDefault();
     setIsPostingResponse(true);
-    const dummyRes = await props.onCreateSurveyEntries({
+    await props.onCreateSurveyEntries({
       id: group,
-      by: params?.get("uid"),
+      startTime: startTime,
+      finishTime: new Date().toISOString(),
+      questionnaireId: getQuestionnaire?.id,
+      surveyEntriesById: params?.get("uid"),
     });
     await Promise.all(
       [
@@ -202,7 +178,7 @@ const SurveyQuestion = (props) => {
     console.log("Survey completed successfully : ");
     props.history.push("/surveyComplete");
   };
-  console.log("ANSLIST", ANSLIST);
+
   const handleNextClick = () => {
     setANSLIST([
       ...ANSLIST,
@@ -281,6 +257,7 @@ const SurveyQuestion = (props) => {
       );
     }
     setCurrentAnswer("");
+    setCheck("");
   };
 
   const handlePreviousClick = () => {
@@ -295,6 +272,7 @@ const SurveyQuestion = (props) => {
     }
     setANSLIST(ANSLIST.slice(0, -1));
   };
+
   const getQuestionView = (q) => {
     switch (q?.type) {
       case "RADIO":
@@ -305,11 +283,8 @@ const SurveyQuestion = (props) => {
               style={{ margin: "10px 0", color: "black" }}
               id="demo-radio-buttons-group-label"
             >
-              <Typography sx={{ paddingTop: 2 }}>
-                {" "}
-                Q.
-                {q?.qu}
-              </Typography>
+              Q.
+              {q?.qu}
             </FormLabel>
             <RadioGroup
               aria-labelledby="demo-radio-buttons-group-label"
@@ -318,7 +293,7 @@ const SurveyQuestion = (props) => {
               value={currentAnswer}
               onChange={onValueChange}
             >
-              {q?.listOptions.map((option, o) => (
+              {q?.listOptions?.map((option, o) => (
                 <FormControlLabel
                   key={o}
                   value={option?.listValue}
@@ -336,11 +311,8 @@ const SurveyQuestion = (props) => {
               style={{ margin: "10px 0", color: "black" }}
               id="demo-radio-buttons-group-label"
             >
-              <Typography sx={{ paddingTop: 2 }}>
-                {" "}
-                Q.
-                {q?.qu}
-              </Typography>
+              Q.
+              {q?.qu}
             </FormLabel>
             <TextField
               required
@@ -361,11 +333,8 @@ const SurveyQuestion = (props) => {
               style={{ margin: "10px 0", color: "black" }}
               id="demo-radio-buttons-group-label"
             >
-              <Typography sx={{ paddingTop: 2 }}>
-                {" "}
-                Q.
-                {q?.qu}
-              </Typography>
+              Q.
+              {q?.qu}
             </FormLabel>
             <RadioGroup
               aria-labelledby="demo-radio-buttons-group-label"
@@ -374,7 +343,7 @@ const SurveyQuestion = (props) => {
               value={currentAnswer}
               onChange={onValueChange}
             >
-              {q?.listOptions.map((option, o) => (
+              {q?.listOptions?.map((option, o) => (
                 <FormControlLabel
                   key={o}
                   value={option?.listValue}
@@ -404,19 +373,21 @@ const SurveyQuestion = (props) => {
                 style={{ margin: "10px 0", color: "black" }}
                 id="demo-radio-buttons-group-label"
               >
-                <Typography sx={{ paddingTop: 2 }}>
-                  {" "}
-                  Q.
-                  {q?.qu}
-                </Typography>
+                Q.
+                {q?.qu}
               </FormLabel>
 
-              {q?.listOptions.map((option, o) => (
+              {q?.listOptions?.map((option, o) => (
                 <FormControlLabel
                   key={o}
                   value={currentAnswer}
-                  onChange={handleChange}
-                  control={<Checkbox key={o} value={option?.listValue} />}
+                  control={
+                    <Checkbox
+                      key={o}
+                      value={option?.listValue}
+                      onChange={handleChange}
+                    />
+                  }
                   label={option?.listValue}
                 />
               ))}
@@ -436,14 +407,11 @@ const SurveyQuestion = (props) => {
                 style={{ margin: "10px 0", color: "black" }}
                 id="demo-radio-buttons-group-label"
               >
-                <Typography sx={{ paddingTop: 2 }}>
-                  {" "}
-                  Q.
-                  {q?.qu}
-                </Typography>
+                Q.
+                {q?.qu}
               </FormLabel>
 
-              {q?.listOptions.map((option, o) => (
+              {q?.listOptions?.map((option, o) => (
                 <FormControlLabel
                   key={o}
                   value={currentAnswer}
@@ -475,13 +443,7 @@ const SurveyQuestion = (props) => {
           </FormControl>
         );
       default:
-        return (
-          <Typography sx={{ paddingTop: 2 }}>
-            {" "}
-            Q.
-            {q?.qu}
-          </Typography>
-        );
+        return <p>Q. {q?.qu}</p>;
     }
   };
 
@@ -513,11 +475,22 @@ const SurveyQuestion = (props) => {
   }
   if (isPostingResponse) {
     return (
-      <div className={classes.loadCenter}>
-        <CircularProgress className={classes.progress} />
-        <Typography variant="h5" component="h3">
-          Posting Responses.Please wait...
-        </Typography>
+      <div style={styles.paperContainer}>
+        <AppBar position="sticky">
+          <Toolbar>
+            <img
+              src="https://dynamix-cdn.s3.amazonaws.com/stonemorcom/stonemorcom_616045937.svg"
+              alt="logo"
+              className={classes.logo}
+            />
+          </Toolbar>
+        </AppBar>
+        <div className={classes.loadCenter}>
+          <CircularProgress className={classes.progress} />
+          <Typography variant="h5" component="h3">
+            Posting Responses.Please wait...
+          </Typography>
+        </div>
       </div>
     );
   }
@@ -540,7 +513,7 @@ const SurveyQuestion = (props) => {
 
   return (
     <div className={classes.root} style={styles.paperContainer}>
-      {/* <AppBar position="stickey">
+      <AppBar position="stickey">
         <div style={{ justifyContent: "center", alignItems: "center" }}>
           <img
             src="https://dynamix-cdn.s3.amazonaws.com/stonemorcom/stonemorcom_616045937.svg"
@@ -548,9 +521,8 @@ const SurveyQuestion = (props) => {
             className={classes.logo}
           />
         </div>
-      </AppBar> */}
-      <AdminMenu />
-      {/* <Dialog
+      </AppBar>
+      <Dialog
         open={open}
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
@@ -569,9 +541,9 @@ const SurveyQuestion = (props) => {
             continue
           </Button>
         </DialogActions>
-      </Dialog> */}
+      </Dialog>
 
-      {/* <Container maxWidth="md">
+      <Container maxWidth="md">
         <Typography className={classes.custom} variant="h5">
           {getQuestionnaire?.name}
         </Typography>
@@ -604,7 +576,7 @@ const SurveyQuestion = (props) => {
                 onClick={handleFinish}
               >
                 Finish
-             
+                {/* <ArrowForwardIcon /> */}
               </Button>
             ) : (
               <Button
@@ -621,23 +593,23 @@ const SurveyQuestion = (props) => {
             )}
           </Box>
         </div>
-      </Container> */}
+      </Container>
 
       {/* <div>
-        <Box display="flex" alignItems="center" justifyContent="center" mt={10}>
-          <Box width="20%" mr={1}>
-            <LinearProgress
-              variant="determinate"
-              value={normalise(props.value)}
-            />
-          </Box>
-          <Box minWidth={35}>
-            <Typography variant="body2" color="textSecondary">{`${Math.round(
-              normalise(props.value)
-            )}%`}</Typography>
-          </Box>
+      <Box display="flex" alignItems="center" justifyContent="center" mt={10}>
+        <Box width="20%" mr={1}>
+          <LinearProgress
+            variant="determinate"
+            value={normalise(props.value)}
+          />
         </Box>
-      </div> */}
+        <Box minWidth={35}>
+          <Typography variant="body2" color="textSecondary">{`${Math.round(
+            normalise(props.value)
+          )}%`}</Typography>
+        </Box>
+      </Box>
+    </div> */}
       <div
         style={{
           // do your styles depending on your needs.
@@ -648,84 +620,21 @@ const SurveyQuestion = (props) => {
         }}
       >
         <Box display="flex" alignItems="center" justifyContent="end">
-          <Box width="0%" mr={1}>
+          <Box width="0%" mr={2.5}>
             <CircularProgress
               variant="determinate"
               value={normalise(props.value)}
+              size="5rem"
+              thickness={5}
             />
           </Box>
           <Box minWidth={40}>
-            <Typography variant="body2" color="textSecondary">{`${Math.round(
+            <Typography variant="h5" color="textSecondary">{`${Math.round(
               normalise(props.value)
             )}%`}</Typography>
           </Box>
         </Box>
       </div>
-      <main className={classes.root}>
-        <Typography variant="h2">Responses</Typography>
-        <p />
-        <Paper className={classes.content}>
-          <Table className={classes.table}>
-            <TableHead>
-              <TableRow>
-                <TableCell>Name</TableCell>
-                <TableCell>Email</TableCell>
-                {/* <TableCell>Type</TableCell> */}
-                {/* <TableCell>Manage</TableCell> */}
-                <TableCell>View</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {listResponsess.items.map((response, q) => (
-                <TableRow key={q}>
-                  <TableCell>
-                    {onGettingSurveyUserNameById(response?.group?.by)}
-                  </TableCell>
-                  <TableCell>
-                    {" "}
-                    {onGettingSurveyUserEmailById(response?.group?.by)}
-                  </TableCell>
-                  {/* <TableCell>{response.type}</TableCell> */}
-                  {/* <TableCell> */}
-                  {/* <Button
-                      size="small"
-                      color="primary"
-                      onClick={handleSnackBarClick}
-                    >
-                      <EditIcon />
-                    </Button> */}
-                  {/* <Button
-                      size="small"
-                      color="primary"
-                      onClick={() => handleOpenDeleteDialog(questionnaire)}
-                    >
-                      <DeleteIcon />
-                    </Button>
-                  </TableCell> */}
-                  <TableCell>
-                    <Button
-                      size="small"
-                      color="primary"
-                      component={Link}
-                      to={`/admin/${response.id}`}
-                    >
-                      <VisibilityIcon />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </Paper>
-        <Button
-          variant="contained"
-          color="primary"
-          className={classes.button}
-          // onClick={handleOpenDialog}
-        >
-          <AddCircleIcon className={classes.rightIcon} /> Add Questionnaire
-        </Button>
-      </main>
     </div>
   );
 };
@@ -767,41 +676,6 @@ const SurveyQuestionarrireQuestion = compose(
         });
       },
     }),
-  }),
-
-  //response//
-  graphql(gql(listResponsess), {
-    options: (props) => ({
-      errorPolicy: "all",
-      fetchPolicy: "cache-and-network",
-    }),
-    props: (props) => {
-      return {
-        listResponsess: props ? props : [],
-      };
-    },
-  }),
-  graphql(gql(listSurveyEntriess), {
-    options: (props) => ({
-      errorPolicy: "all",
-      fetchPolicy: "cache-and-network",
-    }),
-    props: (props) => {
-      return {
-        listSurveyEntriess: props ? props : [],
-      };
-    },
-  }),
-  graphql(gql(listSurveyUsers), {
-    options: (props) => ({
-      errorPolicy: "all",
-      fetchPolicy: "cache-and-network",
-    }),
-    props: (props) => {
-      return {
-        listSurveyUsers: props ? props : [],
-      };
-    },
   })
 )(SurveyQuestion);
 

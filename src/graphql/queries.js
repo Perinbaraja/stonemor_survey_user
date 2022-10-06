@@ -31,6 +31,7 @@ export const getSurvey = /* GraphQL */ `
         id
         name
         description
+        image
         type
         createdAt
         updatedAt
@@ -42,6 +43,7 @@ export const getSurvey = /* GraphQL */ `
         id
         name
         description
+        image
         type
         createdAt
         updatedAt
@@ -53,6 +55,7 @@ export const getSurvey = /* GraphQL */ `
         id
         name
         description
+        image
         type
         createdAt
         updatedAt
@@ -83,6 +86,7 @@ export const listSurveys = /* GraphQL */ `
           id
           name
           description
+          image
           type
           createdAt
           updatedAt
@@ -91,6 +95,7 @@ export const listSurveys = /* GraphQL */ `
           id
           name
           description
+          image
           type
           createdAt
           updatedAt
@@ -99,6 +104,7 @@ export const listSurveys = /* GraphQL */ `
           id
           name
           description
+          image
           type
           createdAt
           updatedAt
@@ -157,6 +163,7 @@ export const listQuestionnaires = /* GraphQL */ `
         id
         name
         description
+        image
         type
         createdAt
         updatedAt
@@ -196,6 +203,7 @@ export const getQuestion = /* GraphQL */ `
         id
         name
         description
+        image
         type
         createdAt
         updatedAt
@@ -228,10 +236,6 @@ export const listQuestions = /* GraphQL */ `
         order
         dependent {
           id
-          options {
-            dependentValue
-            nextQuestion
-          }
         }
         createdAt
         updatedAt
@@ -239,6 +243,7 @@ export const listQuestions = /* GraphQL */ `
           id
           name
           description
+          image
           type
           createdAt
           updatedAt
@@ -277,6 +282,7 @@ export const getResponses = /* GraphQL */ `
           id
           name
           description
+          image
           type
           createdAt
           updatedAt
@@ -284,11 +290,20 @@ export const getResponses = /* GraphQL */ `
       }
       group {
         id
-        by
+        startTime
+        finishTime
+        questionnaireId
         createdAt
         updatedAt
         responses {
           nextToken
+        }
+        by {
+          id
+          name
+          email
+          createdAt
+          updatedAt
         }
       }
     }
@@ -318,7 +333,9 @@ export const listResponsess = /* GraphQL */ `
         }
         group {
           id
-          by
+          startTime
+          finishTime
+          questionnaireId
           createdAt
           updatedAt
         }
@@ -331,7 +348,9 @@ export const getSurveyEntries = /* GraphQL */ `
   query GetSurveyEntries($id: ID!) {
     getSurveyEntries(id: $id) {
       id
-      by
+      startTime
+      finishTime
+      questionnaireId
       createdAt
       updatedAt
       responses {
@@ -342,6 +361,13 @@ export const getSurveyEntries = /* GraphQL */ `
           updatedAt
         }
         nextToken
+      }
+      by {
+        id
+        name
+        email
+        createdAt
+        updatedAt
       }
     }
   }
@@ -355,11 +381,36 @@ export const listSurveyEntriess = /* GraphQL */ `
     listSurveyEntriess(filter: $filter, limit: $limit, nextToken: $nextToken) {
       items {
         id
-        by
+        startTime
+        finishTime
+        questionnaireId
         createdAt
         updatedAt
         responses {
+          items {
+            id
+            res
+            createdAt
+            updatedAt
+            qu {
+              id
+              qu
+              type
+              isSelf
+              isDependent
+              order
+              createdAt
+              updatedAt
+            }
+          }
           nextToken
+        }
+        by {
+          id
+          name
+          email
+          createdAt
+          updatedAt
         }
       }
       nextToken

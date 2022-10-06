@@ -33,7 +33,7 @@ import SurveyComplete from "../custom/surveyComplete";
 import { createTheme } from "@material-ui/core/styles";
 import orange from "@material-ui/core/colors/orange";
 import indigo from "@material-ui/core/colors/indigo";
-import SurveyResponses from "../admin/surveyResponses";
+import SurveyResponses from "../custom/surveyResponses";
 
 const theme = createTheme({
   palette: {
@@ -241,7 +241,10 @@ function App() {
             path="/surveyquestions/:questionnaireID"
             component={SurveyQuestionarrireQuestion}
           />
-          <Route path="/responses/:responseID" component={SurveyResponses} />
+          <Route
+            path="/surveyResponses/:responseID"
+            component={SurveyResponses}
+          />
           <Route path="/surveyComplete" component={SurveyComplete} />
         </BrowserRouter>
       </MuiThemeProvider>

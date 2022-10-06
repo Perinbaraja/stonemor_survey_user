@@ -47,6 +47,7 @@ export const createSurvey = /* GraphQL */ `
         id
         name
         description
+        image
         type
         createdAt
         updatedAt
@@ -58,6 +59,7 @@ export const createSurvey = /* GraphQL */ `
         id
         name
         description
+        image
         type
         createdAt
         updatedAt
@@ -69,6 +71,7 @@ export const createSurvey = /* GraphQL */ `
         id
         name
         description
+        image
         type
         createdAt
         updatedAt
@@ -97,6 +100,7 @@ export const updateSurvey = /* GraphQL */ `
         id
         name
         description
+        image
         type
         createdAt
         updatedAt
@@ -108,6 +112,7 @@ export const updateSurvey = /* GraphQL */ `
         id
         name
         description
+        image
         type
         createdAt
         updatedAt
@@ -119,6 +124,7 @@ export const updateSurvey = /* GraphQL */ `
         id
         name
         description
+        image
         type
         createdAt
         updatedAt
@@ -147,6 +153,7 @@ export const deleteSurvey = /* GraphQL */ `
         id
         name
         description
+        image
         type
         createdAt
         updatedAt
@@ -158,6 +165,7 @@ export const deleteSurvey = /* GraphQL */ `
         id
         name
         description
+        image
         type
         createdAt
         updatedAt
@@ -169,6 +177,7 @@ export const deleteSurvey = /* GraphQL */ `
         id
         name
         description
+        image
         type
         createdAt
         updatedAt
@@ -188,6 +197,7 @@ export const createQuestionnaire = /* GraphQL */ `
       id
       name
       description
+      image
       type
       createdAt
       updatedAt
@@ -216,6 +226,7 @@ export const updateQuestionnaire = /* GraphQL */ `
       id
       name
       description
+      image
       type
       createdAt
       updatedAt
@@ -244,6 +255,7 @@ export const deleteQuestionnaire = /* GraphQL */ `
       id
       name
       description
+      image
       type
       createdAt
       updatedAt
@@ -294,6 +306,7 @@ export const createQuestion = /* GraphQL */ `
         id
         name
         description
+        image
         type
         createdAt
         updatedAt
@@ -335,6 +348,7 @@ export const updateQuestion = /* GraphQL */ `
         id
         name
         description
+        image
         type
         createdAt
         updatedAt
@@ -376,6 +390,7 @@ export const deleteQuestion = /* GraphQL */ `
         id
         name
         description
+        image
         type
         createdAt
         updatedAt
@@ -418,6 +433,7 @@ export const createResponses = /* GraphQL */ `
           id
           name
           description
+          image
           type
           createdAt
           updatedAt
@@ -425,11 +441,20 @@ export const createResponses = /* GraphQL */ `
       }
       group {
         id
-        by
+        startTime
+        finishTime
+        questionnaireId
         createdAt
         updatedAt
         responses {
           nextToken
+        }
+        by {
+          id
+          name
+          email
+          createdAt
+          updatedAt
         }
       }
     }
@@ -467,6 +492,7 @@ export const updateResponses = /* GraphQL */ `
           id
           name
           description
+          image
           type
           createdAt
           updatedAt
@@ -474,11 +500,20 @@ export const updateResponses = /* GraphQL */ `
       }
       group {
         id
-        by
+        startTime
+        finishTime
+        questionnaireId
         createdAt
         updatedAt
         responses {
           nextToken
+        }
+        by {
+          id
+          name
+          email
+          createdAt
+          updatedAt
         }
       }
     }
@@ -516,6 +551,7 @@ export const deleteResponses = /* GraphQL */ `
           id
           name
           description
+          image
           type
           createdAt
           updatedAt
@@ -523,11 +559,20 @@ export const deleteResponses = /* GraphQL */ `
       }
       group {
         id
-        by
+        startTime
+        finishTime
+        questionnaireId
         createdAt
         updatedAt
         responses {
           nextToken
+        }
+        by {
+          id
+          name
+          email
+          createdAt
+          updatedAt
         }
       }
     }
@@ -540,7 +585,9 @@ export const createSurveyEntries = /* GraphQL */ `
   ) {
     createSurveyEntries(input: $input, condition: $condition) {
       id
-      by
+      startTime
+      finishTime
+      questionnaireId
       createdAt
       updatedAt
       responses {
@@ -551,6 +598,13 @@ export const createSurveyEntries = /* GraphQL */ `
           updatedAt
         }
         nextToken
+      }
+      by {
+        id
+        name
+        email
+        createdAt
+        updatedAt
       }
     }
   }
@@ -562,7 +616,9 @@ export const updateSurveyEntries = /* GraphQL */ `
   ) {
     updateSurveyEntries(input: $input, condition: $condition) {
       id
-      by
+      startTime
+      finishTime
+      questionnaireId
       createdAt
       updatedAt
       responses {
@@ -574,6 +630,13 @@ export const updateSurveyEntries = /* GraphQL */ `
         }
         nextToken
       }
+      by {
+        id
+        name
+        email
+        createdAt
+        updatedAt
+      }
     }
   }
 `;
@@ -584,7 +647,9 @@ export const deleteSurveyEntries = /* GraphQL */ `
   ) {
     deleteSurveyEntries(input: $input, condition: $condition) {
       id
-      by
+      startTime
+      finishTime
+      questionnaireId
       createdAt
       updatedAt
       responses {
@@ -595,6 +660,13 @@ export const deleteSurveyEntries = /* GraphQL */ `
           updatedAt
         }
         nextToken
+      }
+      by {
+        id
+        name
+        email
+        createdAt
+        updatedAt
       }
     }
   }
