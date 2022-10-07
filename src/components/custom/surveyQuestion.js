@@ -136,16 +136,15 @@ const SurveyQuestion = (props) => {
   };
   const handleChange = (e) => {
     var temp = check;
+    console.log("CHANGE", e.target);
     if (e.target.checked === false) {
       temp = temp.filter((a) => {
-        return a === e.target.value;
+        return a !== e.target.value;
       });
     }
     e.target.checked
       ? setCheck([...check, e.target.value])
       : setCheck([...temp]);
-    setCurrentAnswer(check);
-    console.log("temp", temp);
   };
 
   const handleFinish = async (event) => {
@@ -283,8 +282,11 @@ const SurveyQuestion = (props) => {
               style={{ margin: "10px 0", color: "black" }}
               id="demo-radio-buttons-group-label"
             >
-              Q.
-              {q?.qu}
+              <Typography sx={{ paddingTop: 2 }}>
+                {" "}
+                Q.
+                {q?.qu}
+              </Typography>
             </FormLabel>
             <RadioGroup
               aria-labelledby="demo-radio-buttons-group-label"
@@ -311,8 +313,11 @@ const SurveyQuestion = (props) => {
               style={{ margin: "10px 0", color: "black" }}
               id="demo-radio-buttons-group-label"
             >
-              Q.
-              {q?.qu}
+              <Typography sx={{ paddingTop: 2 }}>
+                {" "}
+                Q.
+                {q?.qu}
+              </Typography>
             </FormLabel>
             <TextField
               required
@@ -333,8 +338,11 @@ const SurveyQuestion = (props) => {
               style={{ margin: "10px 0", color: "black" }}
               id="demo-radio-buttons-group-label"
             >
-              Q.
-              {q?.qu}
+              <Typography sx={{ paddingTop: 2 }}>
+                {" "}
+                Q.
+                {q?.qu}
+              </Typography>
             </FormLabel>
             <RadioGroup
               aria-labelledby="demo-radio-buttons-group-label"
@@ -373,8 +381,11 @@ const SurveyQuestion = (props) => {
                 style={{ margin: "10px 0", color: "black" }}
                 id="demo-radio-buttons-group-label"
               >
-                Q.
-                {q?.qu}
+                <Typography sx={{ paddingTop: 2 }}>
+                  {" "}
+                  Q.
+                  {q?.qu}
+                </Typography>
               </FormLabel>
 
               {q?.listOptions?.map((option, o) => (
@@ -407,8 +418,11 @@ const SurveyQuestion = (props) => {
                 style={{ margin: "10px 0", color: "black" }}
                 id="demo-radio-buttons-group-label"
               >
-                Q.
-                {q?.qu}
+                <Typography sx={{ paddingTop: 2 }}>
+                  {" "}
+                  Q.
+                  {q?.qu}
+                </Typography>
               </FormLabel>
 
               {q?.listOptions?.map((option, o) => (
@@ -448,6 +462,15 @@ const SurveyQuestion = (props) => {
   };
 
   useEffect(() => {
+    if (
+      currentQuestion?.type === "CHECKBOX" ||
+      currentQuestion?.type === "CHECKBOXWITHTEXT"
+    ) {
+      setCurrentAnswer(check);
+    }
+  }, [check]);
+
+  useEffect(() => {
     if (questions?.length > 0) {
       setCurrentQuestion(
         questions?.find((q) => q?.order === 1) ?? questions[0]
@@ -464,6 +487,8 @@ const SurveyQuestion = (props) => {
       }
     }
   }, [currentQuestion]);
+  // console.log("Demo", ANSLIST, currentAnswer, check);
+
   // console.log("ANSLIST", params?.get("uid"));
 
   if (loading) {
